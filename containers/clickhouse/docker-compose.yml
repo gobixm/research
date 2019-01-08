@@ -1,0 +1,7 @@
+version: '3'
+services:
+  clickhouse-1:
+    image: yandex/clickhouse-server:latest
+    network_mode: host
+    volumes:
+      - ./config.xml:/etc/clickhouse-server/config.xml

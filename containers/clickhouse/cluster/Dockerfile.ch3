@@ -1,0 +1,7 @@
+FROM yandex/clickhouse-server:latest
+
+COPY ["./ch3_config.xml", "/etc/clickhouse-server/config.xml"]
+COPY ["./include_from.xml", "/etc/clickhouse-server/include_from.xml"]
+VOLUME /var/lib/clickhouse
+
+CMD ["clickhouse-server", "--config-file=/etc/clickhouse-server/config.xml"]
