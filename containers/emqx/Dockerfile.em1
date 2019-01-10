@@ -1,0 +1,5 @@
+FROM emqx/emqx:latest
+
+VOLUME /opt/emqx/etc/plugins
+
+CMD ["/opt/emqx/start.sh"]

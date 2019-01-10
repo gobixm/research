@@ -1,0 +1,38 @@
+version: "3.6"
+services:
+  emqx-master:
+    image: emqx/emqx
+    hostname: emqx-master
+    environment:
+      - "EMQX_NAME=emq"
+      - "EMQX_HOST=master.mq.tt"
+      - "EMQX_NODE__COOKIE=ef16498f66804df1cc6172f6996d5492"
+      - "EMQX_WAIT_TIME=60"
+      - "EMQX_LOADED_PLUGINS=emqx_recon,emqx_retainer,emqx_management,emqx_dashboard"
+    networks:
+      emqx-net:
+        aliases:
+          - master.mq.tt
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/TZ:ro
+
+  emqx-worker:
+    image: emqx/emqx
+    hostname: emqx-worker
+    environment:
+      - "EMQX_JOIN_CLUSTER=emq@master.mq.tt"
+      - "EMQX_NODE__COOKIE=ef16498f66804df1cc6172f6996d5492"
+      - "EMQX_WAIT_TIME=60"
+      - "EMQX_LOADED_PLUGINS=emqx_recon,emqx_retainer,emqx_management,emqx_dashboard"
+    depends_on:
+      - emqx-master
+    networks:
+      - emqx-net
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/TZ:ro
+      
+networks:
+  emqx-net:
+    external: false
