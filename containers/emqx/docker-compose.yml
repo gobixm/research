@@ -1,37 +1,83 @@
 version: "3.6"
 services:
-  emqx-master:
+  emqx-1:
     image: emqx/emqx
-    hostname: emqx-master
+    hostname: emqx-1
     environment:
-      - "EMQX_NAME=emq"
-      - "EMQX_HOST=master.mq.tt"
-      - "EMQX_NODE__COOKIE=ef16498f66804df1cc6172f6996d5492"
+      - "EMQX_NAME=emq-1"
+      - "EMQX_HOST=emqx-1.mq.tt"
+      - "EMQX_NODE__COOKIE=ef16498f66804df1cc6172f6996d5491"
       - "EMQX_WAIT_TIME=60"
       - "EMQX_LOADED_PLUGINS=emqx_recon,emqx_retainer,emqx_management,emqx_dashboard"
+      - "EMQX_CLUSTER__STATIC__SEEDS=emq-1@emqx-1.mq.tt,emq-2@emqx-2.mq.tt,emq-3@emqx-3.mq.tt"
+      - "EMQX_NODE__PROCESS_LIMIT=2097152"
+      - "EMQX_NODE__MAX_PORTS=1048576"
+      - "EMQX_LISTENER__TCP__ACCEPTORS=64"
+      - "MAX_CLIENTS=64"
     networks:
       emqx-net:
         aliases:
-          - master.mq.tt
+          - emqx-1.mq.tt    
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/TZ:ro
 
-  emqx-worker:
+  emqx-2:
     image: emqx/emqx
-    hostname: emqx-worker
+    hostname: emqx-2
     environment:
-      - "EMQX_JOIN_CLUSTER=emq@master.mq.tt"
+      - "EMQX_NAME=emq-2"
+      - "EMQX_HOST=emqx-2.mq.tt"
       - "EMQX_NODE__COOKIE=ef16498f66804df1cc6172f6996d5492"
       - "EMQX_WAIT_TIME=60"
       - "EMQX_LOADED_PLUGINS=emqx_recon,emqx_retainer,emqx_management,emqx_dashboard"
-    depends_on:
-      - emqx-master
+      - "EMQX_CLUSTER__STATIC__SEEDS=emq-1@emqx-1.mq.tt,emq-2@emqx-2.mq.tt,emq-3@emqx-3.mq.tt"
+      - "EMQX_NODE__PROCESS_LIMIT=2097152"
+      - "EMQX_NODE__MAX_PORTS=1048576"
+      - "EMQX_LISTENER__TCP__ACCEPTORS=64"
+      - "MAX_CLIENTS=64"
     networks:
-      - emqx-net
+      emqx-net:
+        aliases:
+          - emqx-2.mq.tt    
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/TZ:ro
+
+  emqx-3:
+    image: emqx/emqx
+    hostname: emqx-3
+    environment:
+      - "EMQX_NAME=emq-3"
+      - "EMQX_HOST=emqx-3.mq.tt"
+      - "EMQX_NODE__COOKIE=ef16498f66804df1cc6172f6996d5493"
+      - "EMQX_WAIT_TIME=60"
+      - "EMQX_LOADED_PLUGINS=emqx_recon,emqx_retainer,emqx_management,emqx_dashboard"
+      - "EMQX_CLUSTER__STATIC__SEEDS=emq-1@emqx-1.mq.tt,emq-2@emqx-2.mq.tt,emq-3@emqx-3.mq.tt"
+      - "EMQX_NODE__PROCESS_LIMIT=2097152"
+      - "EMQX_NODE__MAX_PORTS=1048576"
+      - "EMQX_LISTENER__TCP__ACCEPTORS=64"
+      - "MAX_CLIENTS=64"
+    networks:
+      emqx-net:
+        aliases:
+          - emqx-3.mq.tt    
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/TZ:ro
+
+  haproxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.ha.yml
+
+    ports:
+      - "8883:8883"
+
+    networks:
+      emqx-net:
+        aliases:
+          - emqx-ha
       
 networks:
   emqx-net:
